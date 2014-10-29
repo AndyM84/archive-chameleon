@@ -1,0 +1,29 @@
+﻿* { padding:0px; margin:0px; }
+body { background-image:url(../Images/bg.png); font-family:arial; font-size:11px; color:#666; }
+h1 { color:#339933; margin-bottom:12px; }
+h2 { font-size:12px; font-weight:bold; }
+#page { position:relative; width:1000px; margin:0px auto; }
+#page #header { width:1000px; height:100px; }
+#page #content { width:1000px; }
+#page #content #top { display:block; height:7px; background-image:url(../Images/content-top.png); background-repeat:no-repeat; }
+#page #content #body { display:block; overflow:hidden; background-image:url(../Images/content-repeat.png); background-repeat:repeat-y; } 
+#page #content #body #left { width:200px; float:left; }
+#page #content #body #left ul { list-style-type:none; border-bottom:1px solid #aaa; }
+#page #content #body #left ul li { display:block; padding:10px; border-left:1px solid #aaa; border-top:1px solid #aaa; border-right:1px solid #aaa; background-color:#ddd; }
+#page #content #body #left ul li h2 { color:#333; }
+#page #content #body #left ul li.active { background-color:transparent; border:none; padding-top:5px; }
+#page #content #body #left ul li.active h2 { color:#339933; }
+#page #content #body #left ul p { font-size:10px; color:#666; }
+
+#page #content #body #right { width:800px; overflow:hidden; float:left; }
+#page #content #body #right .pad { padding-left:10px; }
+
+#page #content #body #right .row { position:relative; overflow:hidden; margin-bottom:10px; }
+#page #content #body #right .row .left { position:relative; width:150px; float:left; }
+#page #content #body #right .row .left h2 { color:#339933; }
+#page #content #body #right .row .right { position:relative; width:550px; float:left; }
+#page #content #body #right .row .right input[type=text] { display:block; width:400px; padding:5px; }
+#page #content #body #right .row .right input[type=password] { display:block; width:400px; padding:5px; }
+
+
+.continue-button { display:block; width:200px; height:50px; background-image:url(../Images/continue-button.png); background-repeat:no-repeat; }

@@ -1,0 +1,53 @@
+.infoboxes_info, .infoboxes_success, .infoboxes_warning, .infoboxes_error, .infoboxes_validation {
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:13px;
+	border: 1px solid;
+	margin: 10px 5px;
+	padding:15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+}
+
+.infoboxes_info ul, .infoboxes_success ul, .infoboxes_warning ul, .infoboxes_error ul {
+	margin: 0px 0px;
+}
+
+.infoboxes_info {
+	color: #00529B;
+	background-color: #BDE5F8;
+	background-image: url('../../images/default/infoboxes_notice.png');
+}
+
+.infoboxes_info li {
+	color: #00529B;
+}
+
+.infoboxes_success {
+	color: #4F8A10;
+	background-color: #DFF2BF;
+	background-image:url('../../images/default/infoboxes_success.png');
+}
+
+.infoboxes_success li {
+	color: #4F8A10;
+}
+
+.infoboxes_warning {
+	color: #9F6000;
+	background-color: #FEEFB3;
+	background-image: url('../../images/default/infoboxes_warning.png');
+}
+
+.infoboxes_warning li {
+	color: #9F6000;
+}
+
+.infoboxes_error {
+	color: #D8000C;
+	background-color: #FFBABA;
+	background-image: url('../../images/default/infoboxes_error.png');
+}
+
+.infoboxes_error li {
+	color: #D8000C;
+}

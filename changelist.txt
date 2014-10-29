@@ -1,0 +1,65 @@
+=========================================================
+ v0.5 -> v0.6
+=========================================================
+- [Andrew] Fixing bug #0000004 from tracker: Adding fallback for default module templates
+- [Andrew] Fixing bug #0000003 from tracker: Correcting error with package search query
+- [Andrew] Set 'convert_urls' to false for tiny_mce editor in administration
+- [Andrew] Fixing bug #0000006 from tracker: moving jquery and jqueryui to front-end
+- [Andrew] Fixing bug #0000007 from tracker: Fixing stored query in main schema.ext.php (thanks to Chris Butcher for finding and providing fix)
+- [Andrew] Added meta tag support to Scrylemgr (another Chris Butcher idea); Added generator meta tag to admin sys.ext.php and frontend sys.ext.php
+- [Andrew] Fixing bug #0000008 from tracker: Changing base url for front-end layout template cssinc tag
+- [Andrew] Fixing bug #0000009 from tracker: Added jqueryui css to front-end and updated jquery scripts
+- [Andrew] Adding auto-registration of base extensions with N2F
+- [Andrew] Fixing bug #0000011 from tracker: Checking for duplicate users on chameleon_user::create() and chameleon_user::update()
+- [Andrew] Fixing bug #0000012 from tracker: Changing menu highlight for frontend to respond to overridden startMod
+- [Andrew] Fixing bug #0000013 from tracker: Added check for database connection before writing config file
+- [Andrew] Fixing bug #0000017 from tracker: Adding cacheExpire="300" attribute to all <cssinc /> and <jsinc /> tags in layout files
+- [Andrew] Fixing bug #0000019 from tracker: Fixed chameleon_user::update() to work properly pushing updates.
+- [Andrew] Changing field length for package version (from 5 to 15 width)
+- [Andrew] Fixing bug #0000018 from tracker: Adjusting chameleon::initModules() code to account for any supplied level-directories
+- [Andrew] Changing field length for settings logs (from 5 to 15 width)
+- [Andrew] Adjusted definition of CS_USING_SSL to work better with Apache
+- [Andrew] Removing some things for filesize stuff
+- [Andrew] Removed tiny_mce from default...will repurpose as a package (or set of packages with popular WYSIWYG editors)
+- [Andrew] Fixing bug #0000020 from tracker: User data reappearing when creating new users
+- [Andrew] Fixing bug with static chameleon::getPackageVersion() method, reference to $this replaced with self::
+- [Andrew] Added two new methods [storeReturnInInfoboxes() & storeArrayInInfoboxes()] to help with infobox management in modules
+- [Andrew] Modified upcoming version number to be v0.8, set Chameleon's internal version to 0.8b
+- [Andrew] Added new template skin changes (auto-selection of Cham-skin for new templates and $currentSkin property on chameleon class)
+- [Andrew] Fixing bug #0000022 from tracker: Incorrect error source information for n2f_cls->debug->throwError()
+- [Andrew] Modifying chameleon::_initModule() to keep debug dump during data returns with CS_ENABLE_DEV_MODE
+- [Andrew] Adding new template methods to retrieve content or menu locations from a template file
+- [Andrew] Added feature to retain page numbers for csPackages & csUsers admin modules when performing operations (thanks to Chris Butcher for suggestion)
+- [Andrew] Added code to overwrite default values for n2f site configuration (domain and title)
+- [Andrew] Fixed bug #0000028 from tracker: Moved skin insertion code within elseif() to only trigger when skin is not previously detected.
+=========================================================
+
+=========================================================
+ v0.3 -> v0.5
+=========================================================
+- [Andrew] Moved user management/authentication into events for extensibility
+- [Andrew] Added n2f_return option for failure messages on package activation/deactivation
+- [Andrew] Added simple dependency system for package.ini to require active packages before installation
+- [Andrew] Added 'Remember Me' feature for user authentication
+- [Andrew] Added new constant, CS_COOKIE_DOMAIN for setting cookies properly
+- [Matt] Fixed datepicker for administration forms
+- [Andrew] Modified main layout to have flexible copyright year
+- [Andrew & Chris] Added PclZip support to chameleon::installPackage()
+- [Andrew & Chris] Modified accepted package modules to be el-flexible
+- [Andrew] Fixing bug with date sanitizer
+=========================================================
+
+=========================================================
+ v0.2.2 -> v0.3
+=========================================================
+- [Andrew] Removed dbhelper extension
+- [Andrew] Added n2f_database::storeQuery() and n2f_database::storedQuery()
+- [Andrew] Changed all queries in schema.ext.php to new n2f_database versions
+- [Andrew] Updated all queries in framework to use new n2f_database versions
+- [Andrew] Added changelist.txt, because I can't keep track anymore
+- [Andrew] Added database holder for chameleon class (reduces singleton calls)
+- [Andrew] Added database holder for chameleon_user class (reduces singleton calls)
+- [Andrew] Added call to n2f_cls::dumpDebug() if using CS_ENABLE_DEV_MODE
+- [Andrew] Synced code with Yverdon trunk (v1.0), final sync will come later this year
+- [Andrew] Added missing global directories to globals.ext.php
+=========================================================
