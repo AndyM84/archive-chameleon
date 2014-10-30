@@ -61,6 +61,8 @@
 	define('CS_SQL_CREATE_USERSESS_TABLE',			'cs_create_user_session_table');
 	define('CS_SQL_INSERT_USER',					'cs_insert_user');
 	define('CS_SQL_UPDATE_USER',					'cs_update_user');
+	define('CS_SQL_UPDATE_USER_CONFIRM',	'cs_update_user_confirm');
+	define('CS_SQL_SELECT_USER_BY_CONFIRM',	'cs_select_user_by_confirm');
 	define('CS_SQL_DELETE_USER',					'cs_delete_user');
 	define('CS_SQL_SELECT_ALL_USERS',				'cs_select_all_users');
 	define('CS_SQL_SELECT_ALL_USERS_QUERY',			'cs_select_all_users_query');
@@ -121,22 +123,22 @@
 	// Generic queries
 	n2f_database::storeQuery(CS_SQL_CHECK_TABLES, 'mysqli', "SHOW TABLES LIKE '{$dbPrefix}%'");
 	n2f_database::storeQuery(CS_SQL_DROP_TABLES, 'mysqli',
-		"DROP TABLE `{$dbPrefix}cs_packages`".
-		", `{$dbPrefix}cs_settings`".
-		", `{$dbPrefix}cs_settings_log`".
-		", `{$dbPrefix}cs_skins`".
-		", `{$dbPrefix}cs_users`".
-		", `{$dbPrefix}cs_users_log`".
-		", `{$dbPrefix}cs_userperms`".
-		", `{$dbPrefix}cs_userperms_log`".
-		", `{$dbPrefix}cs_perms`".
-		", `{$dbPrefix}cs_perms_log`".
-		", `{$dbPrefix}cs_user_sessions`"
+						"DROP TABLE `{$dbPrefix}cs_packages`".
+						", `{$dbPrefix}cs_settings`".
+						", `{$dbPrefix}cs_settings_log`".
+						", `{$dbPrefix}cs_skins`".
+						", `{$dbPrefix}cs_users`".
+						", `{$dbPrefix}cs_users_log`".
+						", `{$dbPrefix}cs_userperms`".
+						", `{$dbPrefix}cs_userperms_log`".
+						", `{$dbPrefix}cs_perms`".
+						", `{$dbPrefix}cs_perms_log`".
+						", `{$dbPrefix}cs_user_sessions`"
 	);
 
 	// Package queries
 	n2f_database::storeQuery(CS_SQL_CREATE_PACKAGES_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_packages` (
+						"CREATE TABLE `{$dbPrefix}cs_packages` (
 			`packageId` smallint(4) unsigned not null auto_increment,
 			`key` varchar(50) not null,
 			`modules` text not null,
@@ -175,13 +177,13 @@
 
 	// Settings queries
 	n2f_database::storeQuery(CS_SQL_CREATE_SETTINGS_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_settings` (
+						"CREATE TABLE `{$dbPrefix}cs_settings` (
 			`key` varchar(35) not null unique,
 			`value` varchar(250) not null,
 			PRIMARY KEY (`key`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_SETTINGS_LOG_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_settings_log` (
+						"CREATE TABLE `{$dbPrefix}cs_settings_log` (
 			`logId` bigint(15) unsigned not null auto_increment,
 			`key` varchar(35) not null,
 			`value` varchar(250) not null,
@@ -198,7 +200,7 @@
 
 	// Skin queries
 	n2f_database::storeQuery(CS_SQL_CREATE_SKINS_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_skins` (
+						"CREATE TABLE `{$dbPrefix}cs_skins` (
 			`skinId` smallint(3) unsigned not null auto_increment,
 			`key` varchar(50) not null,
 			`skin` varchar(50) not null,
@@ -221,7 +223,7 @@
 
 	// User/permission queries
 	n2f_database::storeQuery(CS_SQL_CREATE_USERS_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_users` (
+						"CREATE TABLE `{$dbPrefix}cs_users` (
 			`userId` int(6) unsigned not null auto_increment,
 			`username` varchar(45) not null,
 			`email` varchar(350) not null,
@@ -229,14 +231,16 @@
 			`salt` varchar(64) not null,
 			`saltExpire` datetime not null,
 			`dateJoined` datetime not null,
+			`confirm` varchar(16),
 			`status` tinyint(1) unsigned not null default '0',
 			PRIMARY KEY (`userId`),
 			INDEX `uname` (`username`(15),`status`),
 			INDEX `joined` (`userId`,`dateJoined`,`status`),
-			INDEX `email` (`email`(35),`status`)
+			INDEX `email` (`email`(35),`status`),
+			INDEX `confirm` (`confirm`(16),`status`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_USERS_LOG_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_users_log` (
+						"CREATE TABLE `{$dbPrefix}cs_users_log` (
 			`logId` bigint(10) unsigned not null auto_increment,
 			`userId` int(6) unsigned not null,
 			`username` varchar(45) not null,
@@ -251,7 +255,7 @@
 			INDEX `user` (`userId`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_USERPERMS_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_userperms` (
+						"CREATE TABLE `{$dbPrefix}cs_userperms` (
 			`upId` int(7) unsigned not null auto_increment,
 			`permId` smallint(4) unsigned not null,
 			`userId` int(6) unsigned not null,
@@ -260,7 +264,7 @@
 			INDEX `user` (`userId`,`granted`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_USERPERMS_LOG_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_userperms_log` (
+						"CREATE TABLE `{$dbPrefix}cs_userperms_log` (
 			`logId` bigint(13) unsigned not null auto_increment,
 			`upId` int(7) unsigned not null,
 			`permId` smallint(4) unsigned not null,
@@ -271,7 +275,7 @@
 			INDEX `user` (`userId`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_PERMS_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_perms` (
+						"CREATE TABLE `{$dbPrefix}cs_perms` (
 			`permId` smallint(4) unsigned not null auto_increment,
 			`packageId` smallint(4) unsigned not null,
 			`key` varchar(50) not null,
@@ -281,7 +285,7 @@
 			INDEX `key` (`key`(15),`packageId`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_PERMS_LOG_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_perms_log` (
+						"CREATE TABLE `{$dbPrefix}cs_perms_log` (
 			`logId` int(7) unsigned not null auto_increment,
 			`permId` smallint(4) unsigned not null,
 			`packageId` smallint(4) unsigned not null,
@@ -293,7 +297,7 @@
 			INDEX `package` (`packageId`,`logged`)
 		)");
 	n2f_database::storeQuery(CS_SQL_CREATE_USERSESS_TABLE, 'mysqli',
-		"CREATE TABLE `{$dbPrefix}cs_user_sessions` (
+						"CREATE TABLE `{$dbPrefix}cs_user_sessions` (
 			`sessionId` bigint(10) unsigned not null auto_increment,
 			`userId` int(6) unsigned not null,
 			`expires` datetime not null,
@@ -304,6 +308,8 @@
 		)");
 	n2f_database::storeQuery(CS_SQL_INSERT_USER, 'mysqli', "INSERT INTO `{$dbPrefix}cs_users` (`username`, `email`, `password`, `salt`, `saltExpire`, `dateJoined`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?)", array(N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_INTEGER));
 	n2f_database::storeQuery(CS_SQL_UPDATE_USER, 'mysqli', "UPDATE `{$dbPrefix}cs_users` SET `username` = ?, `email` = ?, `password` = ?, `salt` = ?, `saltExpire` = ?, `dateJoined` = ?, `status` = ? WHERE `userId` = ?", array(N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_STRING, N2F_DBTYPE_INTEGER, N2F_DBTYPE_INTEGER));
+	n2f_database::storeQuery(CS_SQL_UPDATE_USER_CONFIRM, 'mysqli', "UPDATE `{$dbPrefix}cs_users` SET `confirm` = ? WHERE `userId` = ?", array(N2F_DBTYPE_STRING, N2F_DBTYPE_INTEGER));
+	n2f_database::storeQuery(CS_SQL_SELECT_USER_BY_CONFIRM, 'mysqli', "SELECT * FROM `{$dbPrefix}cs_users` WHERE `confirm` = ?", array(N2F_DBTYPE_STRING));
 	n2f_database::storeQuery(CS_SQL_DELETE_USER, 'mysqli', "DELETE FROM `{$dbPrefix}cs_users` WHERE `userId` = ?", array(N2F_DBTYPE_INTEGER));
 	n2f_database::storeQuery(CS_SQL_SELECT_ALL_USERS, 'mysqli', "SELECT * FROM `{$dbPrefix}cs_users`");
 	n2f_database::storeQuery(CS_SQL_SELECT_ALL_USERS_QUERY, 'mysqli', "SELECT * FROM `{$dbPrefix}cs_users` ORDER BY _%ORDER_BY%_ _%ORDER_DIR%_");

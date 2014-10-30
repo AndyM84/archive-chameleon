@@ -21,6 +21,8 @@
 	define('CS_EVENT_USER_LOGIN',				'cs_event_user_login');
 	define('CS_EVENT_USER_LOGOUT',			'cs_event_user_logout');
 	define('CS_EVENT_USER_CHECKPERM',			'cs_event_user_checkperm');
+	define('CS_EVENT_USER_FORGOT_PASSWORD',			'cs_event_user_forgot_password');
+	define('CS_EVENT_USER_RESET_PASSWORD',			'cs_event_user_reset_password');
 	define('CS_EVENT_USER_FORM',				'cs_event_user_form');
 	define('CS_EVENT_USER_FORMLOAD',			'cs_event_user_formload');
 	define('CS_EVENT_PRE_RENDER',				'cs_event_pre_render');
@@ -69,7 +71,7 @@
 			public $dbPrefix = CS_DATABASE_TABLE_PREFIX;
 			/**
 			 * Holds the currently active skin.
-			 * 
+			 *
 			 * @var string
 			 */
 			public $currentSkin = 'default';
@@ -405,7 +407,7 @@
 
 			/**
 			 * Callback to handle setting the skin for new template objects.
-			 * 
+			 *
 			 * @param n2f_template $tpl	n2f_template object that has just been instantiated.
 			 */
 			public static function templateCreated(n2f_template &$tpl) {
@@ -416,7 +418,7 @@
 
 			/**
 			 * Static method to retrieve a list of any content locations in a given template file.
-			 * 
+			 *
 			 * @param $file	String value of filename (.tpl not necessary).
 			 * @param $module	Optional string value of module for template file, default module used if not supplied.
 			 * @param $skin	Optional string value of skin for template file, default skin used if not supplied.
@@ -453,7 +455,7 @@
 
 			/**
 			 * Static method to retrieve a list of any menu locations in a given template file.
-			 * 
+			 *
 			 * @param $file	String value of filename (.tpl not necessary).
 			 * @param $module	Optional string value of module for template file, default module used if not supplied.
 			 * @param $skin	Optional string value of skin for template file, default skin used if not supplied.
@@ -532,6 +534,27 @@
 			}
 
 			/**
+			 * Method to perform password reset through a replaceable interface.
+			 *
+			 * @param string $username	String value of user's username value.
+			 * @return n2f_return		n2f_return object containing success/failure status and any extra data.
+			 */
+			public static function doForgotPassword($username) {
+				return(chameleon::getInstance()->hitEvent(CS_EVENT_USER_FORGOT_PASSWORD, array($username)));
+			}
+
+			/**
+			 * Method to perform password reset through a replaceable interface.
+			 *
+			 * @param chameleon_user $user       The username of the user
+			 * @param string         $password   The new password
+			 * @return n2f_return
+			 */
+			public static function doPasswordReset($user, $password) {
+				return(chameleon::getInstance()->hitEvent(CS_EVENT_USER_RESET_PASSWORD, array($user, $password)));
+			}
+
+			/**
 			 * Method to perform logout through a replaceable interface.
 			 *
 			 */
@@ -588,6 +611,8 @@
 				$this->addEvent(CS_EVENT_USER_LOGIN, true);
 				$this->addEvent(CS_EVENT_USER_LOGOUT, true);
 				$this->addEvent(CS_EVENT_USER_CHECKPERM, true);
+				$this->addEvent(CS_EVENT_USER_FORGOT_PASSWORD, true);
+				$this->addEvent(CS_EVENT_USER_RESET_PASSWORD, true);
 				$this->addEvent(CS_EVENT_USER_LOAD);
 				$this->addEvent(CS_EVENT_USER_FORM);
 				$this->addEvent(CS_EVENT_USER_FORMLOAD);
@@ -602,6 +627,8 @@
 				$this->hookEvent(CS_EVENT_USER_LOGIN, 'doLogin');
 				$this->hookEvent(CS_EVENT_USER_LOGOUT, 'doLogout');
 				$this->hookEvent(CS_EVENT_USER_CHECKPERM, 'checkUserPerm');
+				$this->hookEvent(CS_EVENT_USER_FORGOT_PASSWORD, 'doForgotPassword');
+				$this->hookEvent(CS_EVENT_USER_RESET_PASSWORD, 'doPasswordReset');
 
 				// reinitialize the database connection
 				$this->db = n2f_database::setInstance(n2f_cls::getInstance(), 'mysqli', false, null, new n2f_cfg_db(array('type' => CS_DATABASE_TYPE, 'host' => CS_DATABASE_HOST, 'port' => CS_DATABASE_PORT, 'name' => CS_DATABASE_NAME, 'user' => CS_DATABASE_USER, 'pass' => CS_DATABASE_PASS)));
@@ -644,8 +671,8 @@
 
 				// Check for database tables
 				if (stripos($_SERVER['REQUEST_URI'], 'setup/') === false && (!isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_packages']) || !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_skins'])
-					|| !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_settings']) || !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_users'])
-					|| !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_userperms']) || !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_perms']) || $this->getSetting('cs_installed') === null)) {
+						|| !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_settings']) || !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_users'])
+						|| !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_userperms']) || !isset($tables[CS_DATABASE_TABLE_PREFIX . 'cs_perms']) || $this->getSetting('cs_installed') === null)) {
 					echo("Fatal Error: Database tables are not installed.  Please try re-installing.");
 
 					exit;
@@ -2493,6 +2520,12 @@
 			 */
 			public $dateJoined;
 			/**
+			 * Confirmation code for security.
+			 *
+			 * @var string
+			 */
+			public $confirm;
+			/**
 			 * Current active status of the user.
 			 *
 			 * @var integer
@@ -2726,6 +2759,28 @@
 			}
 
 			/**
+			 * Static method to generate a random alpha numeric code.
+			 *
+			 * @param int $length
+			 * @return string	Randomized 64-character string.
+			 */
+			public static function generateChars($length) {
+				$ret = '';
+				$chars = array(
+					'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+					'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+					'0','1','2','3','4','5','6','7','8','9'
+				);
+
+				$max = count($chars) - 1;
+				for ($i = 0; $i < $length; $i++) {
+					$ret .= $chars[mt_rand(0, $max)];
+				}
+
+				return($ret);
+			}
+
+			/**
 			 * Static method to search the user database for matching users based on email address and username.
 			 *
 			 * @param string $searchString	Optional string value to use for searching email/username text.
@@ -2850,6 +2905,32 @@
 				}
 
 				$query = $db->storedQuery(CS_SQL_SELECT_USER_BY_USERNAME, array('username' => $username))->execQuery();
+
+				if ($query->isError() || $query->numRows() < 1) {
+					return($ret);
+				}
+
+				$ret->userId = $query->fetchResult(0, 'userId');
+				$ret->update();
+
+				return($ret);
+			}
+
+			/**
+			 * Static method to return a user based on their confirmation code.
+			 *
+			 * @param string $code	String value of user confirmation code.
+			 * @return chameleon_user	chameleon_user object of found user (empty user upon failure).
+			 */
+			public static function getUserByConfirmCode($code) {
+				$ret = new chameleon_user();
+				$db = n2f_database::getInstance();
+
+				if (empty($code) || strlen($code) < 1) {
+					return($ret);
+				}
+
+				$query = $db->storedQuery(CS_SQL_SELECT_USER_BY_CONFIRM, array('confirm' => $code))->execQuery();
 
 				if ($query->isError() || $query->numRows() < 1) {
 					return($ret);
@@ -3259,6 +3340,131 @@
 			}
 
 			return;
+		}
+
+		/**
+		 * Function to generate a new password reset code.
+		 *
+		 * @param string $username
+		 *
+		 * @return n2f_return
+		 */
+		function doForgotPassword($username) {
+			$db = n2f_database::getInstance();
+			$ret = new n2f_return();
+			$ret->isFail();
+
+			$query = $db->storedQuery(CS_SQL_SELECT_USER_BY_USERNAME, array('username' => $username))->execQuery();
+			if ($query->isError()) {
+				$ret->addMsg("Unable to load the user information.");
+
+				if (CS_ENABLE_DEV_MODE) {
+					$ret->addMsg($query->fetchError());
+					$ret->addMsg($query->query);
+				}
+
+				return($ret);
+			}
+
+			if ($query->numRows() != 1) {
+
+				$query = $db->storedQuery(CS_SQL_SELECT_USER_BY_EMAIL, array('email' => $username))->execQuery();
+				if ($query->isError()) {
+					$ret->addMsg("Unable to load the user information.");
+
+					if (CS_ENABLE_DEV_MODE) {
+						$ret->addMsg($query->fetchError());
+						$ret->addMsg($query->query);
+					}
+
+					return($ret);
+				}
+
+				if ($query->numRows() != 1) {
+					$ret->addMsg("Unable to locate the user with that username or email.");
+
+					return($ret);
+				}
+			}
+
+			$user = new chameleon_user($query->fetchResult(0, 'userId'));
+
+			$user->confirm = $user->generateChars(16);
+			if (strlen($user->confirm) != 16) {
+				$ret->addMsg("Unable to generate a confirmation code.");
+
+				return ($ret);
+			}
+
+			$query = $db->storedQuery(CS_SQL_UPDATE_USER_CONFIRM, array('confirm' => $user->confirm, 'userId' => $user->userId))->execQuery();
+			if ($query->isError()) {
+				$ret->addMsg("Unable to generate a confirmation code.");
+
+				if (CS_ENABLE_DEV_MODE) {
+					$ret->addMsg($query->fetchError());
+					$ret->addMsg($query->query);
+				}
+
+				return($ret);
+			}
+
+			$admin = new chameleon_user(1);
+
+			$eTpl = new n2f_template('dynamic');
+			$eTpl->setModule('main')->setFile('forgot_email');
+			$eTpl->setField('user', $user);
+			$eTpl->setField('link', CS_SITE_PATH."admin/?nmod=main&page=reset&confirm=".$user->confirm);
+
+			// Send the reset email
+			if (!chameleon::mail($user->email, "Password Reset", $eTpl->render()->fetch(), "From:".$admin->email."\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1\r\n")) {
+				$ret->isFail();
+				$ret->addMsg('Unable to send the confirmation email.');
+
+				return($ret);
+			}
+
+			$ret->isGood();
+			$ret->addMsg('You should receive an email shortly.<br />Check your spam folder if you do not see it.');
+
+			return($ret);
+		}
+
+		/**
+		 * Function to reset the users password.
+		 *
+		 * @param chameleon_user $user       The username of the user
+		 * @param string         $password   The new password
+		 *
+		 * @return n2f_return
+		 */
+		function doPasswordReset($user, $password) {
+			$db = n2f_database::getInstance();
+			$ret = new n2f_return();
+			$ret->isFail();
+
+			$user->salt = $user->generateSalt();
+			$user->saltExpire = date("Y-m-d H:i:s", strtotime("+14 days"));
+			$user->password = encStr($password . $user->salt);
+			$user->confirm = null;
+
+			$update = $user->update(true);
+			if (!IsSuccess($update)) {
+				return($update);
+			}
+
+			$query = $db->storedQuery(CS_SQL_UPDATE_USER_CONFIRM, array('confirm' => $user->confirm, 'userId' => $user->userId))->execQuery();
+			if ($query->isError()) {
+				if (CS_ENABLE_DEV_MODE) {
+					$ret->addMsg("Unable to remove the confirmation code from your account.");
+					$ret->addMsg($query->fetchError());
+					$ret->addMsg($query->query);
+				}
+			}
+
+			$ret->isGood();
+			$ret->data = $user;
+
+			return($ret);
 		}
 
 		/**
