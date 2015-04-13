@@ -1087,7 +1087,7 @@
 					}
 
 					if ($pQuery->numRows() > 0) {
-						$existing['perms'] = $pQuery->fetchRow();
+						$existing['perms'] = $pQuery->fetchRows();
 					}
 
 					if ($existing['files'] != '') {
